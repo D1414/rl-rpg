@@ -5,14 +5,12 @@
 #define RECT_SIZE 200
 #define FONTSIZE 50
 
-/* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche inputs ausgefuehrt werden duerfen.
+/* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche
+ * inputs ausgefuehrt werden duerfen.
  */
 typedef enum { GAME_RUNNING, GAME_PAUSED } GameState;
 
 GameState gameState = GAME_RUNNING;
-
-// variable zum speichern ob das game im Fullscreen ist.
-bool isFull = false;
 
 // Zeichnen und Funktion des Mutebuttons
 void drawMuteButton(Rectangle muteButton, bool *isMuted, float bgMusicVolume) {
@@ -38,52 +36,61 @@ void drawSlider(Rectangle volumeSlider, float bgMusicVolume) {
              volumeSlider.y + volumeSlider.height / 2, 20, BLUE);
 }
 
-// Zeichnen des Fullscreen button und Modi switch in den Fullscreen 
+// Zeichnen des Fullscreen button und Modi switch in den Fullscreen
 void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                     bool *isFull) {
 
-  int fullscreenWidth = 32 * 3 + 20;
-  int fullscreenHeight = 32 * 3 + 20;
-  int fullscreenX = GetScreenWidth() - fullscreenWidth;
-  int fullscreenY = 20;
-  Rectangle hitBox = {fullscreenX, fullscreenY, fullscreenWidth,
-                      fullscreenHeight};
+  int fullscreenTexWidth = 32 * 3 + 20;
+  int fullscreenTexHeight = 32 * 3 + 20;
+  int fullscreenTexX = GetScreenWidth() - fullscreenTexWidth;
+  int fullscreenTexY = 20;
+  Rectangle hitBox = {fullscreenTexX, fullscreenTexY, fullscreenTexWidth,
+                      fullscreenTexHeight};
   Vector2 mousePosition = GetMousePosition();
-  if (!IsWindowFullscreen()) {
+
+    if (!*isFull) {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
-      DrawTextureEx(fullscreen1, (Vector2){fullscreenX, fullscreenY}, 0, 3.1,
-                    BLACK);
+      DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
+                    3.1, BLACK);
     } else {
-      DrawTextureEx(fullscreen1, (Vector2){fullscreenX, fullscreenY}, 0, 3,
-                    BLACK);
+      DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
+                    3, BLACK);
     }
   } else {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
-      DrawTextureEx(fullscreen2, (Vector2){fullscreenX, fullscreenY}, 0, 3.1,
-                    BLACK);
+      DrawTextureEx(fullscreen2, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
+                    3.1, BLACK);
     } else {
-      DrawTextureEx(fullscreen2, (Vector2){fullscreenX, fullscreenY}, 0, 3,
-                    BLACK);
+      DrawTextureEx(fullscreen2, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
+                    3, BLACK);
     }
   }
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
-      ToggleFullscreen();
-      *isFull = !isFull;
+      // ToggleFullscreen();
+      *isFull = !*isFull;
+      if (*isFull) {
+        ToggleBorderlessWindowed();
+        printf("turned on Fullscreen\n");
+      } else {
+        ToggleBorderlessWindowed();
+        SetWindowSize(1920,1080);
+        printf("disabled fullscreen\n");
+      }
     }
   }
 }
 
 // Zeichnen des Pause Menues und Anwendung der Funktionen fuer funktionen die
-// im Menue Verwendbar sein sollen 
+// im Menue Verwendbar sein sollen
 void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
                float bgMusicVolume, Texture2D fullscreen1,
                Texture2D fullscreen2, bool *isFull) {
   if (gameState == GAME_PAUSED) {
     int screenwidth = GetScreenWidth();
     int screenheight = GetScreenHeight();
-    DrawText("PAUSED", GetScreenWidth() / 2 - MeasureText("PAUSED", 60) / 2,
-             GetScreenHeight() / 2 - 30, 90, WHITE);
+    DrawText("PAUSED", screenwidth / 2 - MeasureText("PAUSED", 60) / 2,
+             screenheight / 2 - 30, 90, WHITE);
     drawMuteButton(muteButton, &isMuted, bgMusicVolume);
     drawSlider(volumeSlider, bgMusicVolume);
     drawFullscreen(fullscreen1, fullscreen2, isFull);
@@ -127,18 +134,15 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
     if (IsKeyDown(KEY_D)) {
       playerPosition->x += *playerSpeed * deltaTime;
     }
-    if (IsKeyReleased(KEY_B)) {
-      printf("Screenwidth: %d/n", GetScreenWidth());
-    }
     *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1500.0f : 600.0f;
   }
   if (IsKeyPressed(KEY_P)) {
     if (gameState == GAME_RUNNING) {
       gameState = GAME_PAUSED;
-      printf("gamestate: %d", gameState);
+      printf("gamestate: %d\n", gameState);
     } else {
       gameState = GAME_RUNNING;
-      printf("gamestate: %d", gameState);
+      printf("gamestate: %d\n", gameState);
     }
   }
 }
@@ -156,8 +160,14 @@ int main(void) {
   float bgMusicVolume = 1 / 3.0f;
   SetMusicVolume(bgMusic, bgMusicVolume);
 
+  // variable zum speicher ob das game gemutet ist.
   bool isMuted = false;
+
+  // variable zum speicher ob das game pausiert ist.
   bool isPaused = false;
+
+  // variable zum speichern ob das game im Fullscreen ist.
+  bool isFull = false;
 
   Vector2 playerPosition = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
   float playerSpeed = 350.0f;
@@ -195,7 +205,7 @@ int main(void) {
     int startY = (int)(camera.target.y - camera.offset.y) / mapTexture.height *
                  mapTexture.height;
 
-   for (int y = startY - mapTexture.height;
+    for (int y = startY - mapTexture.height;
          y < startY + GetScreenHeight() + mapTexture.height;
          y += mapTexture.height) {
       for (int x = startX - mapTexture.width;
