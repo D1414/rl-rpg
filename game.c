@@ -65,7 +65,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                     3, BLACK);
     }
   }
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
+  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
       // ToggleFullscreen();
       *isFull = !*isFull;
