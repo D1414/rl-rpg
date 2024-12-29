@@ -178,15 +178,12 @@ int main(void) {
     mouseIn(muteButton, &isMuted, &bgMusic, &bgMusicVolume, &volumeSlider);
     BeginMode2D(camera);
 
-    // Map zeichnen basierend auf der Kamera
     int startX = (int)(camera.target.x - camera.offset.x) / mapTexture.width *
                  mapTexture.width;
     int startY = (int)(camera.target.y - camera.offset.y) / mapTexture.height *
                  mapTexture.height;
 
-    // Wir zeichnen Kacheln, die das sichtbare Fenster plus eine Reserve
-    // abdecken
-    for (int y = startY - mapTexture.height;
+   for (int y = startY - mapTexture.height;
          y < startY + GetScreenHeight() + mapTexture.height;
          y += mapTexture.height) {
       for (int x = startX - mapTexture.width;
