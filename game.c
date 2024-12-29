@@ -5,11 +5,16 @@
 #define RECT_SIZE 200
 #define FONTSIZE 50
 
+/* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche inputs ausgefuehrt werden duerfen.
+ */
 typedef enum { GAME_RUNNING, GAME_PAUSED } GameState;
 
 GameState gameState = GAME_RUNNING;
+
+// variable zum speichern ob das game im Fullscreen ist.
 bool isFull = false;
 
+// Zeichnen und Funktion des Mutebuttons
 void drawMuteButton(Rectangle muteButton, bool *isMuted, float bgMusicVolume) {
   if (bgMusicVolume == 0) {
     *isMuted = true;
@@ -23,6 +28,7 @@ void drawMuteButton(Rectangle muteButton, bool *isMuted, float bgMusicVolume) {
   DrawText(buttonText, textX, textY, FONTSIZE, BLACK);
 }
 
+// Zeichnen und Funktion des Lautstaerke Reglers
 void drawSlider(Rectangle volumeSlider, float bgMusicVolume) {
   DrawRectangleRec(volumeSlider, DARKGRAY);
   DrawRectangle(volumeSlider.x, volumeSlider.y,
@@ -31,6 +37,8 @@ void drawSlider(Rectangle volumeSlider, float bgMusicVolume) {
   DrawCircle(volumeSlider.x + volumeSlider.width * bgMusicVolume,
              volumeSlider.y + volumeSlider.height / 2, 20, BLUE);
 }
+
+// Zeichnen des Fullscreen button und Modi switch in den Fullscreen 
 void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                     bool *isFull) {
 
@@ -66,6 +74,8 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
   }
 }
 
+// Zeichnen des Pause Menues und Anwendung der Funktionen fuer funktionen die
+// im Menue Verwendbar sein sollen 
 void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
                float bgMusicVolume, Texture2D fullscreen1,
                Texture2D fullscreen2, bool *isFull) {
@@ -80,6 +90,7 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
   }
 }
 
+// mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
              float *bgMusicVolume, Rectangle *volumeSlider) {
   Vector2 mousePosition = GetMousePosition();
@@ -101,6 +112,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   }
 }
 
+// keyboard inputs Verarbeitung
 void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
   if (gameState == GAME_RUNNING) {
     if (IsKeyDown(KEY_W)) {
