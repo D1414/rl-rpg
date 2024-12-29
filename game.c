@@ -74,7 +74,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
         printf("turned on Fullscreen\n");
       } else {
         ToggleBorderlessWindowed();
-        SetWindowSize(1920,1080);
+        SetWindowSize(1900,1080);
         printf("disabled fullscreen\n");
       }
     }
@@ -150,7 +150,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
 int main(void) {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(GetScreenWidth(), GetScreenHeight(), "rlrpg");
+  InitWindow(1900,1080, "rlrpg");
   InitAudioDevice();
   SetTargetFPS(300);
 
