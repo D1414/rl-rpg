@@ -13,8 +13,8 @@ typedef enum { GAME_RUNNING, GAME_PAUSED } GameState;
 GameState gameState = GAME_RUNNING;
 
 // Zeichnen und Funktion des Mutebuttons
-void drawMuteButton(Rectangle muteButton, bool *isMuted, float bgMusicVolume) {
-  if (bgMusicVolume == 0) {
+void drawMuteButton(Rectangle muteButton, bool *isMuted, float *bgMusicVolume) {
+  if (*bgMusicVolume == 0) {
     *isMuted = true;
   }
   DrawRectangleRec(muteButton, *isMuted ? RED : GREEN);
@@ -90,7 +90,9 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
     int screenheight = GetScreenHeight();
     DrawText("PAUSED", screenwidth / 2 - MeasureText("PAUSED", 60) / 2,
              screenheight / 2 - 30, 90, WHITE);
-    drawMuteButton(muteButton, &isMuted, bgMusicVolume);
+    // DrawText(TextFormat("isMuted: %s", isMuted ? "true" : "false"), 0, 50,
+    // 50, YELLOW);
+    drawMuteButton(muteButton, &isMuted, &bgMusicVolume);
     drawSlider(volumeSlider, bgMusicVolume);
     drawFullscreen(fullscreen1, fullscreen2, isFull);
   }
@@ -151,7 +153,8 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
 }
 
 // keyboard inputs Verarbeitung
-void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
+void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
+          bool *isMuted, float *bgMusicVolume, Music *bgMusic) {
   if (gameState == GAME_RUNNING) {
     if (IsKeyDown(KEY_W)) {
       playerPosition->y -= *playerSpeed * deltaTime;
@@ -176,6 +179,17 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
       printf("gamestate: %d\n", gameState);
     }
   }
+  if (IsKeyPressed(KEY_V)) {
+    if (*isMuted) {
+      *isMuted = !*isMuted;
+      *bgMusicVolume = tempMusic;
+    } else {
+      *isMuted = !*isMuted;
+      tempMusic = *bgMusicVolume;
+      *bgMusicVolume = 0;
+    }
+    SetMusicVolume(*bgMusic, *bgMusicVolume);
+  }
 }
 
 int main(void) {
@@ -188,7 +202,7 @@ int main(void) {
   Music bgMusic = LoadMusicStream("ressources/bleach.mp3");
   PlayMusicStream(bgMusic);
 
-  float bgMusicVolume =1;
+  float bgMusicVolume = 0.2f;
   SetMusicVolume(bgMusic, bgMusicVolume);
 
   // variable zum speicher ob das game gemutet ist.
@@ -227,7 +241,8 @@ int main(void) {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    kbIn(&playerSpeed, deltaTime, &playerPosition);
+    kbIn(&playerSpeed, deltaTime, &playerPosition, &isMuted, &bgMusicVolume,
+         &bgMusic);
     mouseIn(muteButton, &isMuted, &bgMusic, &bgMusicVolume, &volumeSlider);
     BeginMode2D(camera);
 
