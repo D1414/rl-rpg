@@ -93,9 +93,15 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
              screenheight / 2 - 30, 90, WHITE);
     drawMuteButton(muteButton, &isMuted, bgMusicVolume);
     drawSlider(volumeSlider, bgMusicVolume);
+    DrawText(TextFormat("isMuted: %s", isMuted ? "true" : "false"), 0, 50, 30,
+             YELLOW);
     drawFullscreen(fullscreen1, fullscreen2, isFull);
   }
 }
+
+// zwischen speicher fuer Musiklautstaerke damit sie 
+// zuruek auf den Wert geht bei dem sie gemutet wurde 
+float tempMusic;
 
 // mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
@@ -103,13 +109,21 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   Vector2 mousePosition = GetMousePosition();
   Rectangle sliderHitbox = {volumeSlider->x, volumeSlider->y,
                             volumeSlider->width, volumeSlider->height + 30};
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
+  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, muteButton)) {
-      *isMuted = !*isMuted;
+      // *isMuted = !*isMuted;
       if (*isMuted) {
+        printf("isMuted tempMusic: %f", tempMusic);
+        *bgMusicVolume = tempMusic;
+        *isMuted = false;
+      } else if (!*isMuted) {
+        tempMusic = *bgMusicVolume;
         *bgMusicVolume = 0;
-        SetMusicVolume(*bgMusic, *bgMusicVolume);
+        *isMuted = true;
+        printf("!isMuted tempMusic: %f", tempMusic);
       }
+      SetMusicVolume(*bgMusic, *bgMusicVolume);
+      printf("bgMusicVolume: %f\ntempMusic: %f\n", *bgMusicVolume, tempMusic);
     }
   }
 
