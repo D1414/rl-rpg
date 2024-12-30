@@ -106,16 +106,28 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, muteButton)) {
       *isMuted = !*isMuted;
-      SetMusicVolume(*bgMusic, *isMuted ? 0.0f : *bgMusicVolume);
+      if (*isMuted) {
+        *bgMusicVolume = 0;
+        SetMusicVolume(*bgMusic, *bgMusicVolume);
+      }
     }
   }
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, sliderHitbox)) {
-      if (!*isMuted) {
+      if (*isMuted) {
+        *isMuted = !*isMuted;
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
         SetMusicVolume(*bgMusic, *bgMusicVolume);
+      } else {
+        *bgMusicVolume =
+            (mousePosition.x - volumeSlider->x) / volumeSlider->width;
+        SetMusicVolume(*bgMusic, *bgMusicVolume);
+        if (*bgMusicVolume <= 0.1f) {
+          *bgMusicVolume = 0;
+          *isMuted = !*isMuted;
+        }
       }
     }
   }
@@ -159,11 +171,11 @@ int main(void) {
   Music bgMusic = LoadMusicStream("ressources/bleach.mp3");
   PlayMusicStream(bgMusic);
 
-  float bgMusicVolume = 1 / 3.0f;
+  float bgMusicVolume = 1 / 5.0f;
   SetMusicVolume(bgMusic, bgMusicVolume);
 
   // variable zum speicher ob das game gemutet ist.
-  bool isMuted = false;
+  bool isMuted = true;
 
   // variable zum speicher ob das game pausiert ist.
   bool isPaused = false;
