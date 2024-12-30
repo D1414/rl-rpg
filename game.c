@@ -115,19 +115,40 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, sliderHitbox)) {
+      //   if (*isMuted) {
+      //     *isMuted = !*isMuted;
+      //     *bgMusicVolume =
+      //         (mousePosition.x - volumeSlider->x) / volumeSlider->width;
+      //     SetMusicVolume(*bgMusic, *bgMusicVolume);
+      //   } else {
+      //     *bgMusicVolume =
+      //         (mousePosition.x - volumeSlider->x) / volumeSlider->width;
+      //     SetMusicVolume(*bgMusic, *bgMusicVolume);
+      //     if (*bgMusicVolume <= 0.1f) {
+      //       *bgMusicVolume = 0;
+      //       *isMuted = !*isMuted;
+      //     }
+      //   }
       if (*isMuted) {
-        *isMuted = !*isMuted;
+        *isMuted = false;
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
         SetMusicVolume(*bgMusic, *bgMusicVolume);
-      } else {
+        printf("Music volume update: %f\n", *bgMusicVolume);
+      }
+      if (!*isMuted) {
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
-        SetMusicVolume(*bgMusic, *bgMusicVolume);
-        if (*bgMusicVolume <= 0.1f) {
+        printf("Music volume update: %f\n", *bgMusicVolume);
+        if (*bgMusicVolume < 0.2f) {
+          *isMuted = true;
           *bgMusicVolume = 0;
-          *isMuted = !*isMuted;
+          SetMusicVolume(*bgMusic,*bgMusicVolume);
+          printf("Sollte sich muten");
+          return;
         }
+        SetMusicVolume(*bgMusic, *bgMusicVolume);
+        printf("Music volume update: %f\n", *bgMusicVolume);
       }
     }
   }
@@ -175,7 +196,7 @@ int main(void) {
   SetMusicVolume(bgMusic, bgMusicVolume);
 
   // variable zum speicher ob das game gemutet ist.
-  bool isMuted = true;
+  bool isMuted = false;
 
   // variable zum speicher ob das game pausiert ist.
   bool isPaused = false;
