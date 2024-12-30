@@ -99,8 +99,8 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
   }
 }
 
-// zwischen speicher fuer Musiklautstaerke damit sie 
-// zuruek auf den Wert geht bei dem sie gemutet wurde 
+// zwischen speicher fuer Musiklautstaerke damit sie
+// zuruek auf den Wert geht bei dem sie gemutet wurde
 float tempMusic;
 
 // mouse inputs Verarbeitung
@@ -145,7 +145,6 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
           *bgMusicVolume = 0;
           SetMusicVolume(*bgMusic, *bgMusicVolume);
           printf("Sollte sich muten");
-          return;
         }
         SetMusicVolume(*bgMusic, *bgMusicVolume);
         printf("Music volume update: %f\n", *bgMusicVolume);
