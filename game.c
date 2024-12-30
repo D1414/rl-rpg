@@ -48,7 +48,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                       fullscreenTexHeight};
   Vector2 mousePosition = GetMousePosition();
 
-    if (!*isFull) {
+  if (!*isFull) {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
       DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
                     3.1, BLACK);
@@ -74,7 +74,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
         printf("turned on Fullscreen\n");
       } else {
         ToggleBorderlessWindowed();
-        SetWindowSize(1900,1080);
+        SetWindowSize(1900, 1080);
         printf("disabled fullscreen\n");
       }
     }
@@ -101,6 +101,8 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
              float *bgMusicVolume, Rectangle *volumeSlider) {
   Vector2 mousePosition = GetMousePosition();
+  Rectangle sliderHitbox = {volumeSlider->x, volumeSlider->y,
+                            volumeSlider->width, volumeSlider->height + 30};
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, muteButton)) {
       *isMuted = !*isMuted;
@@ -109,7 +111,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   }
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
-    if (CheckCollisionPointRec(mousePosition, *volumeSlider)) {
+    if (CheckCollisionPointRec(mousePosition, sliderHitbox)) {
       if (!*isMuted) {
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
@@ -150,7 +152,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
 int main(void) {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(1900,1080, "rlrpg");
+  InitWindow(1900, 1080, "rlrpg");
   InitAudioDevice();
   SetTargetFPS(300);
 
