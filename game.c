@@ -92,8 +92,6 @@ void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
              screenheight / 2 - 30, 90, WHITE);
     drawMuteButton(muteButton, &isMuted, bgMusicVolume);
     drawSlider(volumeSlider, bgMusicVolume);
-    DrawText(TextFormat("isMuted: %s", isMuted ? "true" : "false"), 0, 50, 30,
-             YELLOW);
     drawFullscreen(fullscreen1, fullscreen2, isFull);
   }
 }
