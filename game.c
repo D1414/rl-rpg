@@ -115,20 +115,6 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, sliderHitbox)) {
-      //   if (*isMuted) {
-      //     *isMuted = !*isMuted;
-      //     *bgMusicVolume =
-      //         (mousePosition.x - volumeSlider->x) / volumeSlider->width;
-      //     SetMusicVolume(*bgMusic, *bgMusicVolume);
-      //   } else {
-      //     *bgMusicVolume =
-      //         (mousePosition.x - volumeSlider->x) / volumeSlider->width;
-      //     SetMusicVolume(*bgMusic, *bgMusicVolume);
-      //     if (*bgMusicVolume <= 0.1f) {
-      //       *bgMusicVolume = 0;
-      //       *isMuted = !*isMuted;
-      //     }
-      //   }
       if (*isMuted) {
         *isMuted = false;
         *bgMusicVolume =
@@ -143,7 +129,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
         if (*bgMusicVolume < 0.2f) {
           *isMuted = true;
           *bgMusicVolume = 0;
-          SetMusicVolume(*bgMusic,*bgMusicVolume);
+          SetMusicVolume(*bgMusic, *bgMusicVolume);
           printf("Sollte sich muten");
           return;
         }
