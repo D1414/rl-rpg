@@ -188,11 +188,11 @@ int main(void) {
   Music bgMusic = LoadMusicStream("ressources/bleach.mp3");
   PlayMusicStream(bgMusic);
 
-  float bgMusicVolume =0;
+  float bgMusicVolume =1;
   SetMusicVolume(bgMusic, bgMusicVolume);
 
   // variable zum speicher ob das game gemutet ist.
-  bool isMuted = true;
+  bool isMuted = false;
 
   // variable zum speicher ob das game pausiert ist.
   bool isPaused = false;
