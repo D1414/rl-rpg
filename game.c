@@ -65,16 +65,15 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                     3, BLACK);
     }
   }
-  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (CheckCollisionPointRec(mousePosition, hitBox)) {
-      // ToggleFullscreen();
       *isFull = !*isFull;
       if (*isFull) {
         ToggleBorderlessWindowed();
         printf("turned on Fullscreen\n");
-      } else {
+      }
+      if (!*isFull) {
         ToggleBorderlessWindowed();
-        SetWindowSize(1900, 1080);
         printf("disabled fullscreen\n");
       }
     }
@@ -140,7 +139,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
         printf("Music volume update: %f\n", *bgMusicVolume);
-        if (*bgMusicVolume < 0.2f) {
+        if (*bgMusicVolume < 0.1f) {
           *isMuted = true;
           *bgMusicVolume = 0;
           SetMusicVolume(*bgMusic, *bgMusicVolume);
@@ -184,7 +183,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition) {
 int main(void) {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(1900, 1080, "rlrpg");
+  InitWindow(GetScreenWidth(), GetScreenHeight(), "rlrpg");
   InitAudioDevice();
   SetTargetFPS(300);
 
