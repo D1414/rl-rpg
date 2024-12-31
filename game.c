@@ -10,7 +10,33 @@
  */
 typedef enum { GAME_RUNNING, GAME_PAUSED } GameState;
 
+// Minimap Modes zum auswaehlen welche minimap angezeigt werden soll
+typedef enum { MINIMAP_OFF, MINIMAP_SMALL, MINIMAP_BIG } MinimapMode;
+MinimapMode minimapMode = MINIMAP_SMALL;
+
+// Minimap standart ist auf small gestellt
 GameState gameState = GAME_RUNNING;
+
+void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
+                 int mapHeight) {
+  if (mode == MINIMAP_OFF)
+    return;
+
+  int minimapWidth, minimapHeight;
+  Vector2 minimapPosition;
+
+  if (mode == MINIMAP_SMALL) {
+    minimapWidth = 400;
+    minimapHeight = 400;
+    minimapPosition = (Vector2){20, 30};
+  } else if (mode == MINIMAP_BIG) {
+    minimapWidth = GetScreenWidth() - 100;
+    minimapHeight = GetScreenHeight() - 100;
+    minimapPosition = (Vector2){50, 50};
+  }
+  DrawRectangle(minimapPosition.x, minimapPosition.y, minimapWidth,
+                minimapHeight, BLACK);
+}
 
 // Zeichnen und Funktion des Mutebuttons
 void drawMuteButton(Rectangle muteButton, bool *isMuted, float *bgMusicVolume) {
@@ -190,6 +216,10 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     }
     SetMusicVolume(*bgMusic, *bgMusicVolume);
   }
+  if (IsKeyPressed(KEY_M)) {
+    minimapMode = (minimapMode + 1) % 3;
+    printf("minimapMode: %d", minimapMode);
+  }
 }
 
 int main(void) {
@@ -288,6 +318,7 @@ int main(void) {
     // drawMuteButton(muteButton, isMuted);
     drawPause(muteButton, isMuted, volumeSlider, bgMusicVolume, fullscreen1,
               fullscreen2, &isFull);
+    drawMinimap(minimapMode, playerPosition, mapMax, mapMin);
 
     EndDrawing();
   }
