@@ -175,7 +175,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
         *bgMusicVolume =
             (mousePosition.x - volumeSlider->x) / volumeSlider->width;
         printf("Music volume update: %f\n", *bgMusicVolume);
-        if (*bgMusicVolume < 0.1f) {
+        if (*bgMusicVolume < 0.05f) {
           *isMuted = true;
           *bgMusicVolume = 0;
           SetMusicVolume(*bgMusic, *bgMusicVolume);
