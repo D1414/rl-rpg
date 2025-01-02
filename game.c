@@ -36,6 +36,16 @@ void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
   }
   DrawRectangle(minimapPosition.x, minimapPosition.y, minimapWidth,
                 minimapHeight, BLACK);
+  float scaleX = (float)minimapWidth / mapWidth;
+  float scaleY = (float)minimapHeight / mapHeight;
+
+  float playerMapX = (playerposition.x + (float)RECT_SIZE / 2) * scaleX;
+  float playerMapY = (playerposition.y + (float)RECT_SIZE / 2) * scaleY;
+
+  DrawRectangleLines(minimapPosition.x, minimapPosition.y, minimapWidth,
+                     minimapHeight, WHITE);
+  DrawCircle(minimapPosition.x + playerMapX, minimapPosition.y + playerMapY, 10,
+             RED);
 }
 
 // Zeichnen und Funktion des Mutebuttons
@@ -291,7 +301,7 @@ int main(void) {
       }
     }
     int mapMin = 0;
-    int mapMax = 10000;
+    int mapMax = 100000;
 
     if (playerPosition.x < mapMin)
       playerPosition.x = mapMin;
@@ -304,7 +314,7 @@ int main(void) {
     DrawRectangleLinesEx(
         (Rectangle){mapMin - 20, mapMin - 20, mapMax + 40, mapMax + 40}, 20,
         BROWN);
-    // Spieler
+
     DrawRectangleV(playerPosition, (Vector2){200, 200}, BLUE);
     DrawRectangleLinesEx(
         (Rectangle){playerPosition.x, playerPosition.y, 200, 200}, 10, BLACK);
@@ -318,7 +328,7 @@ int main(void) {
     // drawMuteButton(muteButton, isMuted);
     drawPause(muteButton, isMuted, volumeSlider, bgMusicVolume, fullscreen1,
               fullscreen2, &isFull);
-    drawMinimap(minimapMode, playerPosition, mapMax, mapMin);
+    drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
 
     EndDrawing();
   }
