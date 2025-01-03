@@ -206,7 +206,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     }
     *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1500.0f : 600.0f;
   }
-  if (IsKeyPressed(KEY_P)) {
+  if (IsKeyPressed(KEY_ESCAPE)) {
     if (gameState == GAME_RUNNING) {
       gameState = GAME_PAUSED;
       printf("gamestate: %d\n", gameState);
@@ -264,6 +264,8 @@ int main(void) {
   Texture2D fullscreen2 = LoadTexture("ressources/fullscreen_2.png");
 
   while (!WindowShouldClose()) {
+
+    SetExitKey(KEY_NULL);
     int fps = GetFPS();
     float deltaTime = GetFrameTime();
     UpdateMusicStream(bgMusic);
