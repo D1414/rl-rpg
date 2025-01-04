@@ -29,23 +29,23 @@ void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
   if (mode == MINIMAP_SMALL) {
     minimapWidth = 400;
     minimapHeight = 400;
-    minimapPosition = (Vector2){20, 30};
+    minimapPosition = (Vector2){30, 30};
   } else if (mode == MINIMAP_BIG) {
     minimapWidth = GetScreenWidth() - 100;
     minimapHeight = GetScreenHeight() - 100;
     minimapPosition = (Vector2){50, 50};
   }
-  DrawRectangle(minimapPosition.x, minimapPosition.y, minimapWidth,
-                minimapHeight, BLACK);
+  DrawRectangle(minimapPosition.x - 10, minimapPosition.y - 10,
+                minimapWidth + 20, minimapHeight + 20, BLACK);
   float scaleX = (float)minimapWidth / mapWidth;
   float scaleY = (float)minimapHeight / mapHeight;
 
   float playerMapX = (playerposition.x + (float)RECT_SIZE / 2) * scaleX;
   float playerMapY = (playerposition.y + (float)RECT_SIZE / 2) * scaleY;
 
-  DrawRectangleLines(minimapPosition.x, minimapPosition.y, minimapWidth,
-                     minimapHeight, WHITE);
-  DrawCircle(minimapPosition.x + playerMapX, minimapPosition.y + playerMapY, 10,
+  DrawRectangleLines(minimapPosition.x - 10, minimapPosition.y - 10,
+                     minimapWidth + 20, minimapHeight + 20, WHITE);
+  DrawCircle(minimapPosition.x + playerMapX, minimapPosition.y + playerMapY, 15,
              RED);
 }
 
@@ -340,9 +340,10 @@ int main(void) {
     DrawRectangleV(playerPosition, (Vector2){200, 200}, BLUE);
     DrawRectangleLinesEx(
         (Rectangle){playerPosition.x, playerPosition.y, 200, 200}, 10, BLACK);
-    DrawText(TextFormat("FPS: %d", fps),
-             camera.target.x - (int)(GetScreenWidth() / 2),
-             camera.target.y - (int)(GetScreenHeight() / 2), 60, YELLOW);
+    // DrawText(TextFormat("FPS: %d", fps),
+    //          camera.target.x + 100 - (int)(GetScreenWidth() / 2),
+    //          camera.target.y + 100 - (int)(GetScreenHeight() / 2),
+    //          60, YELLOW);
     EndMode2D();
 
     // Zeichnen des Mute buttons und des sliders
