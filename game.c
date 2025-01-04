@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define RECT_SIZE 200
 #define FONTSIZE 50
@@ -115,22 +116,38 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
     }
   }
 }
+void drawExit(Rectangle exitButton) {
+  Vector2 mousePosition = GetMousePosition();
+  DrawRectangleRec(exitButton, DARKGRAY);
+  DrawRectangleLinesEx(exitButton, 10, BLACK);
+  const char *exitText = "Exit";
+  int textWidth = MeasureText(exitText, 100);
+  int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
+  int textY = exitButton.y + (exitButton.height / 2) - (100 / 2.0);
+  DrawText(exitText, textX, textY, 100, LIGHTGRAY);
+  if (CheckCollisionPointRec(mousePosition, exitButton) &&
+      IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+    CloseWindow();
+    exit(0);
+  }
+}
 
 // Zeichnen des Pause Menues und Anwendung der Funktionen fuer funktionen die
 // im Menue Verwendbar sein sollen
-void drawPause(Rectangle muteButton, bool isMuted, Rectangle volumeSlider,
-               float bgMusicVolume, Texture2D fullscreen1,
-               Texture2D fullscreen2, bool *isFull) {
+void drawPause(Rectangle exitButton, Rectangle muteButton, bool isMuted,
+               Rectangle volumeSlider, float bgMusicVolume,
+               Texture2D fullscreen1, Texture2D fullscreen2, bool *isFull) {
   if (gameState == GAME_PAUSED) {
     int screenwidth = GetScreenWidth();
     int screenheight = GetScreenHeight();
-    DrawText("PAUSED", screenwidth / 2 - MeasureText("PAUSED", 60) / 2,
-             screenheight / 2 - 30, 90, WHITE);
+    DrawText("PAUSED", screenwidth / 2 - MeasureText("PAUSED", 100) / 2,
+             screenheight / 2 - 30, 100, WHITE);
     // DrawText(TextFormat("isMuted: %s", isMuted ? "true" : "false"), 0, 50,
     // 50, YELLOW);
     drawMuteButton(muteButton, &isMuted, &bgMusicVolume);
     drawSlider(volumeSlider, bgMusicVolume);
     drawFullscreen(fullscreen1, fullscreen2, isFull);
+    drawExit(exitButton);
   }
 }
 
@@ -236,17 +253,18 @@ int main(void) {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(GetScreenWidth(), GetScreenHeight(), "rlrpg");
+  MaximizeWindow();
   InitAudioDevice();
   SetTargetFPS(300);
 
   Music bgMusic = LoadMusicStream("ressources/bleach.mp3");
   PlayMusicStream(bgMusic);
 
-  float bgMusicVolume = 0.2f;
+  float bgMusicVolume = 0.0f;
   SetMusicVolume(bgMusic, bgMusicVolume);
 
   // variable zum speicher ob das game gemutet ist.
-  bool isMuted = false;
+  bool isMuted = true;
 
   // variable zum speicher ob das game pausiert ist.
   bool isPaused = false;
@@ -270,8 +288,8 @@ int main(void) {
     float deltaTime = GetFrameTime();
     UpdateMusicStream(bgMusic);
     // kamera
-    camera.offset =
-        (Vector2){GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+    camera.offset = (Vector2){GetScreenWidth() / 2.0f - 100,
+                              GetScreenHeight() / 2.0f - 100};
     camera.zoom = 1.0f;
     camera.target = playerPosition;
 
@@ -279,6 +297,8 @@ int main(void) {
                               300, 20};
     Rectangle muteButton = {GetScreenWidth() - volumeSlider.width / 2 - 100,
                             GetScreenHeight() - 200, 200, 100};
+    Rectangle exitButton = {(float)GetScreenWidth() / 2 - (float)350 / 2,
+                            (float)GetScreenHeight() / 2 + 80, 350, 150};
 
     BeginDrawing();
     ClearBackground(BLACK);
@@ -328,8 +348,8 @@ int main(void) {
     // Zeichnen des Mute buttons und des sliders
     // drawSlider(volumeSlider, bgMusicVolume);
     // drawMuteButton(muteButton, isMuted);
-    drawPause(muteButton, isMuted, volumeSlider, bgMusicVolume, fullscreen1,
-              fullscreen2, &isFull);
+    drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
+              fullscreen1, fullscreen2, &isFull);
     drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
 
     EndDrawing();
@@ -337,6 +357,8 @@ int main(void) {
   UnloadMusicStream(bgMusic);
   CloseAudioDevice();
   UnloadTexture(mapTexture);
+  UnloadTexture(fullscreen1);
+  UnloadTexture(fullscreen2);
   CloseWindow();
 
   return 0;
