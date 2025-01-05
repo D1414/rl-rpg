@@ -23,6 +23,19 @@ bool isHovered(Rectangle rect) {
   return CheckCollisionPointRec(mousePosition, rect);
 }
 
+void highlightButton(Rectangle *rect) {
+  float scaleWidth = rect->width / 8;
+  float scaleHeight = rect->height / 8;
+  int scaleX = scaleWidth / 2;
+  int scaleY = scaleHeight / 2;
+  if (isHovered(*rect)) {
+    rect->width = rect->width + scaleWidth;
+    rect->height = rect->height + scaleHeight;
+    rect->x = rect->x - scaleX;
+    rect->y = rect->y - scaleY;
+  }
+}
+
 void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
                  int mapHeight) {
   if (mode == MINIMAP_OFF)
@@ -59,6 +72,7 @@ void drawMuteButton(Rectangle muteButton, bool *isMuted, float *bgMusicVolume) {
   if (*bgMusicVolume == 0) {
     *isMuted = true;
   }
+  highlightButton(&muteButton);
   DrawRectangleRec(muteButton, *isMuted ? RED : GREEN);
   DrawRectangleLinesEx(muteButton, 7, BLACK);
   const char *buttonText = *isMuted ? "MUTED" : "MUSIC";
@@ -121,13 +135,21 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
   }
 }
 void drawExit(Rectangle exitButton) {
+  // enable highlighting for button
+  highlightButton(&exitButton);
+
   DrawRectangleRec(exitButton, DARKGRAY);
-  DrawRectangleLinesEx(exitButton, 10, BLACK);
+
+  // different color when hovered
+  DrawRectangleLinesEx(exitButton, 5, isHovered(exitButton) ? WHITE : BLACK);
   const char *exitText = "Exit";
-  int textWidth = MeasureText(exitText, 100);
+
+  // diferent size when hovered
+  int fontsize = !isHovered(exitButton) ? 115 : 115 + 20;
+  int textWidth = MeasureText(exitText, fontsize);
   int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
-  int textY = exitButton.y + (exitButton.height / 2) - (100 / 2.0);
-  DrawText(exitText, textX, textY, 100, LIGHTGRAY);
+  int textY = exitButton.y + (exitButton.height / 2) - (fontsize / 2.0);
+  DrawText(exitText, textX, textY, fontsize, LIGHTGRAY);
   if (isHovered(exitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     CloseWindow();
     exit(0);
@@ -182,6 +204,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (isHovered(sliderHitbox)) {
+      Vector2 mousePosition = GetMousePosition();
       if (*isMuted) {
         *isMuted = false;
         *bgMusicVolume =
