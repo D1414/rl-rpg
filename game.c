@@ -18,6 +18,11 @@ MinimapMode minimapMode = MINIMAP_SMALL;
 // Minimap standart ist auf small gestellt
 GameState gameState = GAME_RUNNING;
 
+bool isHovered(Rectangle rect) {
+  Vector2 mousePosition = GetMousePosition();
+  return CheckCollisionPointRec(mousePosition, rect);
+}
+
 void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
                  int mapHeight) {
   if (mode == MINIMAP_OFF)
@@ -83,10 +88,9 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
   int fullscreenTexY = 20;
   Rectangle hitBox = {fullscreenTexX, fullscreenTexY, fullscreenTexWidth,
                       fullscreenTexHeight};
-  Vector2 mousePosition = GetMousePosition();
 
   if (!*isFull) {
-    if (CheckCollisionPointRec(mousePosition, hitBox)) {
+    if (isHovered(hitBox)) {
       DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
                     3.1, BLACK);
     } else {
@@ -94,7 +98,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
                     3, BLACK);
     }
   } else {
-    if (CheckCollisionPointRec(mousePosition, hitBox)) {
+    if (isHovered(hitBox)) {
       DrawTextureEx(fullscreen2, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
                     3.1, BLACK);
     } else {
@@ -103,7 +107,7 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
     }
   }
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
-    if (CheckCollisionPointRec(mousePosition, hitBox)) {
+    if (isHovered(hitBox)) {
       *isFull = !*isFull;
       if (*isFull) {
         ToggleBorderlessWindowed();
@@ -117,7 +121,6 @@ void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
   }
 }
 void drawExit(Rectangle exitButton) {
-  Vector2 mousePosition = GetMousePosition();
   DrawRectangleRec(exitButton, DARKGRAY);
   DrawRectangleLinesEx(exitButton, 10, BLACK);
   const char *exitText = "Exit";
@@ -125,8 +128,7 @@ void drawExit(Rectangle exitButton) {
   int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
   int textY = exitButton.y + (exitButton.height / 2) - (100 / 2.0);
   DrawText(exitText, textX, textY, 100, LIGHTGRAY);
-  if (CheckCollisionPointRec(mousePosition, exitButton) &&
-      IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+  if (isHovered(exitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     CloseWindow();
     exit(0);
   }
@@ -158,11 +160,10 @@ float tempMusic;
 // mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
              float *bgMusicVolume, Rectangle *volumeSlider) {
-  Vector2 mousePosition = GetMousePosition();
   Rectangle sliderHitbox = {volumeSlider->x, volumeSlider->y,
                             volumeSlider->width, volumeSlider->height + 30};
   if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
-    if (CheckCollisionPointRec(mousePosition, muteButton)) {
+    if (isHovered(muteButton)) {
       // *isMuted = !*isMuted;
       if (*isMuted) {
         printf("isMuted tempMusic: %f", tempMusic);
@@ -180,7 +181,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   }
 
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
-    if (CheckCollisionPointRec(mousePosition, sliderHitbox)) {
+    if (isHovered(sliderHitbox)) {
       if (*isMuted) {
         *isMuted = false;
         *bgMusicVolume =
@@ -244,7 +245,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     SetMusicVolume(*bgMusic, *bgMusicVolume);
   }
   if (IsKeyPressed(KEY_M)) {
-    minimapMode = (minimapMode + 1) % 3;
+    minimapMode = (MinimapMode)((minimapMode + 1) % 3);
     printf("minimapMode: %d", minimapMode);
   }
 }
