@@ -145,11 +145,11 @@ void drawExit(Rectangle exitButton) {
   const char *exitText = "Exit";
 
   // diferent size when hovered
-  int fontsize = !isHovered(exitButton) ? 115 : 115 + 20;
+  int fontsize = !isHovered(exitButton) ? 115 : 115 + 10;
   int textWidth = MeasureText(exitText, fontsize);
   int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
-  int textY = exitButton.y + (exitButton.height / 2) - (fontsize / 2.0);
-  DrawText(exitText, textX, textY, fontsize, LIGHTGRAY);
+  int textY = exitButton.y + (exitButton.height / 2) - (fontsize / 2.0 - 10);
+  DrawText(exitText, textX, textY -5, fontsize, LIGHTGRAY);
   if (isHovered(exitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     CloseWindow();
     exit(0);
@@ -188,14 +188,14 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
     if (isHovered(muteButton)) {
       // *isMuted = !*isMuted;
       if (*isMuted) {
-        printf("isMuted tempMusic: %f", tempMusic);
+        printf("isMuted tempMusic: %f\n", tempMusic);
         *bgMusicVolume = tempMusic;
         *isMuted = false;
       } else if (!*isMuted) {
         tempMusic = *bgMusicVolume;
         *bgMusicVolume = 0;
         *isMuted = true;
-        printf("!isMuted tempMusic: %f", tempMusic);
+        printf("!isMuted tempMusic: %f\n", tempMusic);
       }
       SetMusicVolume(*bgMusic, *bgMusicVolume);
       printf("bgMusicVolume: %f\ntempMusic: %f\n", *bgMusicVolume, tempMusic);
@@ -220,7 +220,7 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
           *isMuted = true;
           *bgMusicVolume = 0;
           SetMusicVolume(*bgMusic, *bgMusicVolume);
-          printf("Sollte sich muten");
+          printf("Sollte sich muten\n");
         }
         SetMusicVolume(*bgMusic, *bgMusicVolume);
         printf("Music volume update: %f\n", *bgMusicVolume);
@@ -269,7 +269,7 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
   }
   if (IsKeyPressed(KEY_M)) {
     minimapMode = (MinimapMode)((minimapMode + 1) % 3);
-    printf("minimapMode: %d", minimapMode);
+    printf("minimapMode: %d\n", minimapMode);
   }
 }
 
@@ -322,7 +322,7 @@ int main(void) {
     Rectangle muteButton = {GetScreenWidth() - volumeSlider.width / 2 - 100,
                             GetScreenHeight() - 200, 200, 100};
     Rectangle exitButton = {(float)GetScreenWidth() / 2 - (float)350 / 2,
-                            (float)GetScreenHeight() / 2 + 80, 350, 150};
+                            (float)GetScreenHeight() / 2 + 80, 350, 130};
 
     BeginDrawing();
     ClearBackground(BLACK);
