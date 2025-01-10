@@ -18,6 +18,13 @@ MinimapMode minimapMode = MINIMAP_SMALL;
 // Minimap standart ist auf small gestellt
 GameState gameState = GAME_RUNNING;
 
+// zwischen speicher fuer Musiklautstaerke damit sie
+// zuruek auf den Wert geht bei dem sie gemutet wurde
+float tempMusic;
+
+// zwischen speicher fuer Musiklautstaerke damit sie
+// zuruek auf den Wert geht bei dem sie gemutet wurde
+float tempMusic;
 bool isHovered(Rectangle rect) {
   Vector2 mousePosition = GetMousePosition();
   return CheckCollisionPointRec(mousePosition, rect);
@@ -149,7 +156,7 @@ void drawExit(Rectangle exitButton) {
   int textWidth = MeasureText(exitText, fontsize);
   int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
   int textY = exitButton.y + (exitButton.height / 2) - (fontsize / 2.0 - 10);
-  DrawText(exitText, textX, textY -5, fontsize, LIGHTGRAY);
+  DrawText(exitText, textX, textY - 5, fontsize, LIGHTGRAY);
   if (isHovered(exitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     CloseWindow();
     exit(0);
@@ -175,10 +182,6 @@ void drawPause(Rectangle exitButton, Rectangle muteButton, bool isMuted,
   }
 }
 
-// zwischen speicher fuer Musiklautstaerke damit sie
-// zuruek auf den Wert geht bei dem sie gemutet wurde
-float tempMusic;
-
 // mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
              float *bgMusicVolume, Rectangle *volumeSlider) {
@@ -186,7 +189,6 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
                             volumeSlider->width, volumeSlider->height + 30};
   if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (isHovered(muteButton)) {
-      // *isMuted = !*isMuted;
       if (*isMuted) {
         printf("isMuted tempMusic: %f\n", tempMusic);
         *bgMusicVolume = tempMusic;
@@ -364,15 +366,8 @@ int main(void) {
     DrawRectangleV(playerPosition, (Vector2){200, 200}, BLUE);
     DrawRectangleLinesEx(
         (Rectangle){playerPosition.x, playerPosition.y, 200, 200}, 10, BLACK);
-    // DrawText(TextFormat("FPS: %d", fps),
-    //          camera.target.x + 100 - (int)(GetScreenWidth() / 2),
-    //          camera.target.y + 100 - (int)(GetScreenHeight() / 2),
-    //          60, YELLOW);
     EndMode2D();
 
-    // Zeichnen des Mute buttons und des sliders
-    // drawSlider(volumeSlider, bgMusicVolume);
-    // drawMuteButton(muteButton, isMuted);
     drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
               fullscreen1, fullscreen2, &isFull);
     drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
