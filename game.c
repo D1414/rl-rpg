@@ -9,10 +9,18 @@
 /* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche
  * inputs ausgefuehrt werden duerfen.
  */
-typedef enum { GAME_RUNNING, GAME_PAUSED } GameState;
+typedef enum { GAME_RUNNING, GAME_PAUSED, GAME_SHOP } GameState;
 
 // Minimap Modes zum auswaehlen welche minimap angezeigt werden soll
 typedef enum { MINIMAP_OFF, MINIMAP_SMALL, MINIMAP_BIG } MinimapMode;
+
+typedef struct {
+  Rectangle rec;
+  Color color;
+  const char *text;
+  int fontsize;
+} ShopItem;
+
 MinimapMode minimapMode = MINIMAP_SMALL;
 
 // Minimap standart ist auf small gestellt
@@ -21,13 +29,18 @@ GameState gameState = GAME_RUNNING;
 // zwischen speicher fuer Musiklautstaerke damit sie
 // zuruek auf den Wert geht bei dem sie gemutet wurde
 float tempMusic;
-
-// zwischen speicher fuer Musiklautstaerke damit sie
-// zuruek auf den Wert geht bei dem sie gemutet wurde
-float tempMusic;
 bool isHovered(Rectangle rect) {
   Vector2 mousePosition = GetMousePosition();
   return CheckCollisionPointRec(mousePosition, rect);
+}
+void drawTextOnRec(Rectangle rec, const char *text, int size) {
+
+  // diferent size when hovered
+  int fontsize = !isHovered(rec) ? size : size + size / 20;
+  int textWidth = MeasureText(text, fontsize);
+  int textX = rec.x + (rec.width / 2) - (textWidth / 2.0);
+  int textY = rec.y + (rec.height / 2) - (fontsize / 2.0 - 10);
+  DrawText(text, textX, textY - 5, fontsize, LIGHTGRAY);
 }
 
 void highlightButton(Rectangle *rect) {
@@ -40,6 +53,44 @@ void highlightButton(Rectangle *rect) {
     rect->height = rect->height + scaleHeight;
     rect->x = rect->x - scaleX;
     rect->y = rect->y - scaleY;
+  }
+}
+
+void drawShopRec(Rectangle shop) { DrawRectangleRec(shop, DARKBROWN); }
+
+void drawShopItems(bool shopOpen) {
+  int wX = GetScreenWidth() / 2 - 1000 / 2,
+      wY = GetScreenHeight() / 2 - 1500 / 2;
+
+  ShopItem doner = {(Rectangle){wX + 40, wY + 150, 400, 200}, DARKGRAY, "Döner",
+                    120};
+  ShopItem shawarma = {(Rectangle){wX + 40, wY + 400, 400, 200}, DARKGRAY,
+                       "Shawarma", 80};
+
+  ShopItem *items[] = {&doner, &shawarma};
+  if (shopOpen) {
+    for (size_t i = 0; i < 2; i++) {
+      ShopItem *item = items[i];
+      highlightButton(&item->rec);
+      DrawRectangleRec(item->rec, item->color);
+      DrawRectangleLinesEx(item->rec, 5, isHovered(item->rec) ? WHITE : BLACK);
+      drawTextOnRec(item->rec, item->text, item->fontsize);
+    }
+  }
+}
+
+void drawShop(bool shopOpen) {
+  int windowWidth = 1000, windowHeight = 1500;
+  int windowX = GetScreenWidth() / 2 - windowWidth / 2;
+  int windowY = GetScreenHeight() / 2 - windowHeight / 2;
+
+  if (shopOpen) {
+    Rectangle textField =
+        (Rectangle){windowX, windowY, windowWidth, windowHeight};
+    DrawRectangleRec(textField, LIGHTGRAY);
+    DrawRectangleLinesEx(textField, 10, BLACK);
+    DrawText("Shop:", windowX + 20, windowY + 20, 100, BLACK);
+    drawShopItems(shopOpen);
   }
 }
 
@@ -233,7 +284,8 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
 
 // keyboard inputs Verarbeitung
 void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
-          bool *isMuted, float *bgMusicVolume, Music *bgMusic) {
+          bool *isMuted, float *bgMusicVolume, Music *bgMusic, Rectangle shop,
+          bool *shopOpen) {
   if (gameState == GAME_RUNNING) {
     if (IsKeyDown(KEY_W)) {
       playerPosition->y -= *playerSpeed * deltaTime;
@@ -247,15 +299,18 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     if (IsKeyDown(KEY_D)) {
       playerPosition->x += *playerSpeed * deltaTime;
     }
-    *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1500.0f : 600.0f;
+    *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1800.0f : 600.0f;
   }
   if (IsKeyPressed(KEY_ESCAPE)) {
     if (gameState == GAME_RUNNING) {
       gameState = GAME_PAUSED;
       printf("gamestate: %d\n", gameState);
-    } else {
+    } else if (gameState == GAME_PAUSED) {
       gameState = GAME_RUNNING;
       printf("gamestate: %d\n", gameState);
+    } else if (gameState == GAME_SHOP) {
+      *shopOpen = !*shopOpen;
+      gameState = GAME_RUNNING;
     }
   }
   if (IsKeyPressed(KEY_V)) {
@@ -269,9 +324,23 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     }
     SetMusicVolume(*bgMusic, *bgMusicVolume);
   }
-  if (IsKeyPressed(KEY_M)) {
+  if (IsKeyPressed(KEY_M) && gameState == GAME_RUNNING) {
     minimapMode = (MinimapMode)((minimapMode + 1) % 3);
     printf("minimapMode: %d\n", minimapMode);
+  }
+  if (CheckCollisionPointRec((Vector2){playerPosition->x, playerPosition->y},
+                             shop) &&
+      IsKeyPressed(KEY_F)) {
+    if (gameState == GAME_RUNNING) {
+      gameState = GAME_SHOP;
+      *shopOpen = !*shopOpen;
+      printf("shop: %s\n", *shopOpen ? "open" : "close");
+    } else if (gameState == GAME_SHOP) {
+
+      gameState = GAME_RUNNING;
+      *shopOpen = !*shopOpen;
+      printf("shop: %s\n", *shopOpen ? "open" : "close");
+    }
   }
 }
 
@@ -281,7 +350,7 @@ int main(void) {
   InitWindow(GetScreenWidth(), GetScreenHeight(), "rlrpg");
   MaximizeWindow();
   InitAudioDevice();
-  SetTargetFPS(300);
+  SetTargetFPS(144);
 
   Music bgMusic = LoadMusicStream("ressources/bleach.mp3");
   PlayMusicStream(bgMusic);
@@ -298,12 +367,14 @@ int main(void) {
   // variable zum speichern ob das game im Fullscreen ist.
   bool isFull = false;
 
+  bool shopOpen = false;
+
   Vector2 playerPosition = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-  float playerSpeed = 350.0f;
+  float playerSpeed = 600.0f;
 
   Camera2D camera = {0};
 
-  Texture2D mapTexture = LoadTexture("ressources/grass.png");
+  Texture2D mapTexture = LoadTexture("ressources/grass_dark.png");
   Texture2D fullscreen1 = LoadTexture("ressources/fullscreen_1.png");
   Texture2D fullscreen2 = LoadTexture("ressources/fullscreen_2.png");
 
@@ -326,11 +397,12 @@ int main(void) {
     Rectangle exitButton = {(float)GetScreenWidth() / 2 - (float)350 / 2,
                             (float)GetScreenHeight() / 2 + 80, 350, 130};
 
+    Rectangle shop = {0, 0, 300, 300};
     BeginDrawing();
     ClearBackground(BLACK);
 
     kbIn(&playerSpeed, deltaTime, &playerPosition, &isMuted, &bgMusicVolume,
-         &bgMusic);
+         &bgMusic, shop, &shopOpen);
     mouseIn(muteButton, &isMuted, &bgMusic, &bgMusicVolume, &volumeSlider);
     BeginMode2D(camera);
 
@@ -363,11 +435,16 @@ int main(void) {
         (Rectangle){mapMin - 20, mapMin - 20, mapMax + 40, mapMax + 40}, 20,
         BROWN);
 
-    DrawRectangleV(playerPosition, (Vector2){200, 200}, BLUE);
+    DrawRectangleV(playerPosition, (Vector2){200, 200},
+                   (Color){99, 149, 238, 255});
     DrawRectangleLinesEx(
         (Rectangle){playerPosition.x, playerPosition.y, 200, 200}, 10, BLACK);
+
+    drawShopRec(shop);
+
     EndMode2D();
 
+    drawShop(shopOpen);
     drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
               fullscreen1, fullscreen2, &isFull);
     drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
