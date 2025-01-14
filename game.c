@@ -58,28 +58,40 @@ void highlightButton(Rectangle *rect) {
 
 void drawShopRec(Rectangle shop) { DrawRectangleRec(shop, DARKBROWN); }
 
-void drawShopItems(bool shopOpen) {
-  int wX = GetScreenWidth() / 2 - 1000 / 2,
-      wY = GetScreenHeight() / 2 - 1500 / 2;
+void drawShopItems(bool shopOpen, float scaleX, float scaleY) {
+  int wX = (GetScreenWidth() / 2.0 - 1000.0 / 2 + 40),
+      wY = (GetScreenHeight() / 2.0 - 1500.0 / 2);
 
-  ShopItem doner = {(Rectangle){wX + 40, wY + 150, 400, 200}, DARKGRAY, "Döner",
-                    120};
-  ShopItem shawarma = {(Rectangle){wX + 40, wY + 400, 400, 200}, DARKGRAY,
-                       "Shawarma", 80};
+  int width = 400 * (1 - scaleX + 1);
+  int height = 200 * (1 - scaleY + 1);
 
-  ShopItem *items[] = {&doner, &shawarma};
+  ShopItem items[] = {
+      (ShopItem){(Rectangle){wX, (wY + 150), width, height}, DARKGRAY, "Döner",
+                 120},
+      (ShopItem){(Rectangle){wX, wY + 400, width, height}, DARKGRAY, "Shawarma",
+                 80},
+      (ShopItem){(Rectangle){wX, wY + 650, width, height}, DARKGRAY, "Pizza",
+                 120},
+      (ShopItem){(Rectangle){wX, wY + 900, width, height}, DARKGRAY, "Justin",
+                 110},
+  };
+
+  size_t itemCount = sizeof(items) / sizeof(items[0]);
   if (shopOpen) {
-    for (size_t i = 0; i < 2; i++) {
-      ShopItem *item = items[i];
-      highlightButton(&item->rec);
-      DrawRectangleRec(item->rec, item->color);
-      DrawRectangleLinesEx(item->rec, 5, isHovered(item->rec) ? WHITE : BLACK);
-      drawTextOnRec(item->rec, item->text, item->fontsize);
+
+    printf("scaleX: %f\n", scaleX);
+    printf("scaleY: %f\n", scaleY);
+    for (size_t i = 0; i < itemCount; i++) {
+      ShopItem item = items[i];
+      highlightButton(&item.rec);
+      DrawRectangleRec(item.rec, item.color);
+      DrawRectangleLinesEx(item.rec, 5, isHovered(item.rec) ? WHITE : BLACK);
+      drawTextOnRec(item.rec, item.text, item.fontsize);
     }
   }
 }
 
-void drawShop(bool shopOpen) {
+void drawShop(bool shopOpen, float scaleX, float scaleY) {
   int windowWidth = 1000, windowHeight = 1500;
   int windowX = GetScreenWidth() / 2 - windowWidth / 2;
   int windowY = GetScreenHeight() / 2 - windowHeight / 2;
@@ -90,7 +102,7 @@ void drawShop(bool shopOpen) {
     DrawRectangleRec(textField, LIGHTGRAY);
     DrawRectangleLinesEx(textField, 10, BLACK);
     DrawText("Shop:", windowX + 20, windowY + 20, 100, BLACK);
-    drawShopItems(shopOpen);
+    drawShopItems(shopOpen, scaleX, scaleY);
   }
 }
 
@@ -345,9 +357,10 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
 }
 
 int main(void) {
-
+  Image icon = LoadImage("ressources/icon.png");
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(GetScreenWidth(), GetScreenHeight(), "rlrpg");
+  SetWindowIcon(icon);
   MaximizeWindow();
   InitAudioDevice();
   SetTargetFPS(144);
@@ -379,6 +392,9 @@ int main(void) {
   Texture2D fullscreen2 = LoadTexture("ressources/fullscreen_2.png");
 
   while (!WindowShouldClose()) {
+
+    float scaleX = 2560.0f / GetScreenWidth();
+    float scaleY = 1440.0f / GetScreenHeight();
 
     SetExitKey(KEY_NULL);
     int fps = GetFPS();
@@ -444,7 +460,7 @@ int main(void) {
 
     EndMode2D();
 
-    drawShop(shopOpen);
+    drawShop(shopOpen, scaleX, scaleY);
     drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
               fullscreen1, fullscreen2, &isFull);
     drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
