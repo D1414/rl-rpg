@@ -6,6 +6,9 @@
 #define RECT_SIZE 200
 #define FONTSIZE 50
 
+#define MAPMIN 0
+#define MAPMAX 10000
+
 /* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche
  * inputs ausgefuehrt werden duerfen.
  */
@@ -58,15 +61,15 @@ void highlightButton(Rectangle *rect) {
 
 void drawShopRec(Rectangle shop) { DrawRectangleRec(shop, DARKBROWN); }
 
-void drawShopItems(bool shopOpen, float scaleX, float scaleY) {
-  int wX = (GetScreenWidth() / 2.0 - 1000.0 / 2 + 40),
-      wY = (GetScreenHeight() / 2.0 - 1500.0 / 2);
+void drawShopItems(bool shopOpen) {
+  int wX = GetScreenWidth() / 2 - 1000 / 2 + 40,
+      wY = GetScreenHeight() / 2 - 1500 / 2;
 
-  int width = 400 * (1 - scaleX + 1);
-  int height = 200 * (1 - scaleY + 1);
+  int width = 400;
+  int height = 200;
 
   ShopItem items[] = {
-      (ShopItem){(Rectangle){wX, (wY + 150), width, height}, DARKGRAY, "Döner",
+      (ShopItem){(Rectangle){wX, wY + 150, width, height}, DARKGRAY, "Döner",
                  120},
       (ShopItem){(Rectangle){wX, wY + 400, width, height}, DARKGRAY, "Shawarma",
                  80},
@@ -74,13 +77,12 @@ void drawShopItems(bool shopOpen, float scaleX, float scaleY) {
                  120},
       (ShopItem){(Rectangle){wX, wY + 900, width, height}, DARKGRAY, "Justin",
                  110},
+      (ShopItem){(Rectangle){wX, wY + 1150, width, height}, DARKGRAY, "Zafer",
+                 120},
   };
 
   size_t itemCount = sizeof(items) / sizeof(items[0]);
   if (shopOpen) {
-
-    printf("scaleX: %f\n", scaleX);
-    printf("scaleY: %f\n", scaleY);
     for (size_t i = 0; i < itemCount; i++) {
       ShopItem item = items[i];
       highlightButton(&item.rec);
@@ -91,7 +93,7 @@ void drawShopItems(bool shopOpen, float scaleX, float scaleY) {
   }
 }
 
-void drawShop(bool shopOpen, float scaleX, float scaleY) {
+void drawShop(bool shopOpen) {
   int windowWidth = 1000, windowHeight = 1500;
   int windowX = GetScreenWidth() / 2 - windowWidth / 2;
   int windowY = GetScreenHeight() / 2 - windowHeight / 2;
@@ -102,7 +104,7 @@ void drawShop(bool shopOpen, float scaleX, float scaleY) {
     DrawRectangleRec(textField, LIGHTGRAY);
     DrawRectangleLinesEx(textField, 10, BLACK);
     DrawText("Shop:", windowX + 20, windowY + 20, 100, BLACK);
-    drawShopItems(shopOpen, scaleX, scaleY);
+    drawShopItems(shopOpen);
   }
 }
 
@@ -299,18 +301,44 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
           bool *isMuted, float *bgMusicVolume, Music *bgMusic, Rectangle shop,
           bool *shopOpen) {
   if (gameState == GAME_RUNNING) {
+    float playerMove = *playerSpeed * deltaTime;
+
+    // New potential position
+    Vector2 newPosition = *playerPosition;
+
+    // Check the movement direction and calculate the new position
     if (IsKeyDown(KEY_W)) {
-      playerPosition->y -= *playerSpeed * deltaTime;
+      newPosition.y -= playerMove;
     }
     if (IsKeyDown(KEY_A)) {
-      playerPosition->x -= *playerSpeed * deltaTime;
+      newPosition.x -= playerMove;
     }
     if (IsKeyDown(KEY_S)) {
-      playerPosition->y += *playerSpeed * deltaTime;
+      newPosition.y += playerMove;
     }
     if (IsKeyDown(KEY_D)) {
-      playerPosition->x += *playerSpeed * deltaTime;
+      newPosition.x += playerMove;
     }
+
+    // Ensure the player does not move outside the map boundaries
+    if (newPosition.x < MAPMIN)
+      newPosition.x = MAPMIN;
+    if (newPosition.y < MAPMIN)
+      newPosition.y = MAPMIN;
+    if (newPosition.x > MAPMAX - RECT_SIZE)
+      newPosition.x = MAPMAX - RECT_SIZE;
+    if (newPosition.y > MAPMAX - RECT_SIZE)
+      newPosition.y = MAPMAX - RECT_SIZE;
+
+    // Collision check: make sure the player does not walk through the shop
+    Rectangle playerRect = {newPosition.x, newPosition.y, RECT_SIZE, RECT_SIZE};
+    if (!CheckCollisionRecs(
+            playerRect,
+            (Rectangle){shop.x, shop.y, shop.width - 15, shop.height - 15})) {
+      *playerPosition =
+          newPosition; // Update the player's position if no collision
+    }
+
     *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1800.0f : 600.0f;
   }
   if (IsKeyPressed(KEY_ESCAPE)) {
@@ -393,9 +421,6 @@ int main(void) {
 
   while (!WindowShouldClose()) {
 
-    float scaleX = 2560.0f / GetScreenWidth();
-    float scaleY = 1440.0f / GetScreenHeight();
-
     SetExitKey(KEY_NULL);
     int fps = GetFPS();
     float deltaTime = GetFrameTime();
@@ -436,19 +461,8 @@ int main(void) {
         DrawTexture(mapTexture, x, y, WHITE);
       }
     }
-    int mapMin = 0;
-    int mapMax = 100000;
-
-    if (playerPosition.x < mapMin)
-      playerPosition.x = mapMin;
-    if (playerPosition.y < mapMin)
-      playerPosition.y = mapMin;
-    if (playerPosition.x > mapMax - RECT_SIZE)
-      playerPosition.x = mapMax - RECT_SIZE;
-    if (playerPosition.y > mapMax - RECT_SIZE)
-      playerPosition.y = mapMax - RECT_SIZE;
     DrawRectangleLinesEx(
-        (Rectangle){mapMin - 20, mapMin - 20, mapMax + 40, mapMax + 40}, 20,
+        (Rectangle){MAPMIN - 20, MAPMIN - 20, MAPMAX + 40, MAPMAX + 40}, 20,
         BROWN);
 
     DrawRectangleV(playerPosition, (Vector2){200, 200},
@@ -459,11 +473,10 @@ int main(void) {
     drawShopRec(shop);
 
     EndMode2D();
-
-    drawShop(shopOpen, scaleX, scaleY);
+    drawShop(shopOpen);
     drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
               fullscreen1, fullscreen2, &isFull);
-    drawMinimap(minimapMode, playerPosition, mapMax, mapMax);
+    drawMinimap(minimapMode, playerPosition, MAPMAX, MAPMAX);
 
     EndDrawing();
   }
