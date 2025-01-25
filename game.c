@@ -1,37 +1,11 @@
-#include <raylib.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "game.h"
 
-#define RECT_SIZE 200
-#define FONTSIZE 50
-
-#define MAPMIN 0
-#define MAPMAX 10000
-
-/* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche
- * inputs ausgefuehrt werden duerfen.
- */
-typedef enum { GAME_RUNNING, GAME_PAUSED, GAME_SHOP } GameState;
-
-// Minimap Modes zum auswaehlen welche minimap angezeigt werden soll
-typedef enum { MINIMAP_OFF, MINIMAP_SMALL, MINIMAP_BIG } MinimapMode;
-
-typedef struct {
-  Rectangle rec;
-  Color color;
-  const char *text;
-  int fontsize;
-} ShopItem;
-
-MinimapMode minimapMode = MINIMAP_SMALL;
-
-// Minimap standart ist auf small gestellt
-GameState gameState = GAME_RUNNING;
-
-// zwischen speicher fuer Musiklautstaerke damit sie
-// zuruek auf den Wert geht bei dem sie gemutet wurde
-float tempMusic;
+// globale variablen
+MinimapMode minimapMode =
+    MINIMAP_SMALL;                  // Minimap standart ist auf small gestellt
+GameState gameState = GAME_RUNNING; // game faengt running an
+float tempMusic; // zwischen speicher fuer Musiklautstaerke damit sie, zuruek
+                 // auf den Wert geht bei dem sie gemutet wurde
 bool isHovered(Rectangle rect) {
   Vector2 mousePosition = GetMousePosition();
   return CheckCollisionPointRec(mousePosition, rect);
@@ -296,17 +270,14 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
   }
 }
 
-// keyboard inputs Verarbeitung
 void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
           bool *isMuted, float *bgMusicVolume, Music *bgMusic, Rectangle shop,
           bool *shopOpen) {
   if (gameState == GAME_RUNNING) {
     float playerMove = *playerSpeed * deltaTime;
 
-    // New potential position
     Vector2 newPosition = *playerPosition;
 
-    // Check the movement direction and calculate the new position
     if (IsKeyDown(KEY_W)) {
       newPosition.y -= playerMove;
     }
@@ -320,7 +291,6 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
       newPosition.x += playerMove;
     }
 
-    // Ensure the player does not move outside the map boundaries
     if (newPosition.x < MAPMIN)
       newPosition.x = MAPMIN;
     if (newPosition.y < MAPMIN)
@@ -330,13 +300,11 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
     if (newPosition.y > MAPMAX - RECT_SIZE)
       newPosition.y = MAPMAX - RECT_SIZE;
 
-    // Collision check: make sure the player does not walk through the shop
     Rectangle playerRect = {newPosition.x, newPosition.y, RECT_SIZE, RECT_SIZE};
     if (!CheckCollisionRecs(
             playerRect,
             (Rectangle){shop.x, shop.y, shop.width - 15, shop.height - 15})) {
-      *playerPosition =
-          newPosition; // Update the player's position if no collision
+      *playerPosition = newPosition;
     }
 
     *playerSpeed = IsKeyDown(KEY_LEFT_SHIFT) ? 1800.0f : 600.0f;
