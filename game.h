@@ -7,19 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define RECT_SIZE 200
-#define FONTSIZE 50
-
-#define MAPMIN 0
-#define MAPMAX 10000
-
 /* Unterschiedliche gamestates die entscheiden was angezeigt wird, und welche
  * inputs ausgefuehrt werden duerfen.
  */
 typedef enum { GAME_RUNNING, GAME_PAUSED, GAME_SHOP } GameState;
-
-// Minimap Modes zum auswaehlen welche minimap angezeigt werden soll
-typedef enum { MINIMAP_OFF, MINIMAP_SMALL, MINIMAP_BIG } MinimapMode;
 
 // ShopItem struct zum einfachen einfuegen von items in den shop
 typedef struct {
@@ -40,10 +31,6 @@ void highlightButton(Rectangle *rect);
 void drawShopRec(Rectangle shop);
 void drawShopItems(bool shopOpen);
 void drawShop(bool shopOpen);
-
-// Minimap Funktionen
-void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
-                 int mapHeight);
 
 // Pause-Menü Funktionen
 void drawMuteButton(Rectangle muteButton, bool *isMuted, float *bgMusicVolume);

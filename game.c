@@ -1,4 +1,6 @@
 #include "game.h"
+#include "drawrl.h"
+#include <raylib.h>
 
 // globale variablen
 MinimapMode minimapMode =
@@ -51,7 +53,7 @@ void drawShopItems(bool shopOpen) {
                  120},
       (ShopItem){(Rectangle){wX, wY + 900, width, height}, DARKGRAY, "Justin",
                  110},
-      (ShopItem){(Rectangle){wX, wY + 1150, width, height}, DARKGRAY, "Zafer",
+      (ShopItem){(Rectangle){wX, wY + 1150, width, height}, DARKGRAY, "ZafoG",
                  120},
   };
 
@@ -80,37 +82,6 @@ void drawShop(bool shopOpen) {
     DrawText("Shop:", windowX + 20, windowY + 20, 100, BLACK);
     drawShopItems(shopOpen);
   }
-}
-
-void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
-                 int mapHeight) {
-  if (mode == MINIMAP_OFF)
-    return;
-
-  int minimapWidth, minimapHeight;
-  Vector2 minimapPosition;
-
-  if (mode == MINIMAP_SMALL) {
-    minimapWidth = 400;
-    minimapHeight = 400;
-    minimapPosition = (Vector2){30, 30};
-  } else if (mode == MINIMAP_BIG) {
-    minimapWidth = GetScreenWidth() - 100;
-    minimapHeight = GetScreenHeight() - 100;
-    minimapPosition = (Vector2){50, 50};
-  }
-  DrawRectangle(minimapPosition.x - 10, minimapPosition.y - 10,
-                minimapWidth + 20, minimapHeight + 20, BLACK);
-  float scaleX = (float)minimapWidth / mapWidth;
-  float scaleY = (float)minimapHeight / mapHeight;
-
-  float playerMapX = (playerposition.x + (float)RECT_SIZE / 2) * scaleX;
-  float playerMapY = (playerposition.y + (float)RECT_SIZE / 2) * scaleY;
-
-  DrawRectangleLines(minimapPosition.x - 10, minimapPosition.y - 10,
-                     minimapWidth + 20, minimapHeight + 20, WHITE);
-  DrawCircle(minimapPosition.x + playerMapX, minimapPosition.y + playerMapY, 15,
-             RED);
 }
 
 // Zeichnen und Funktion des Mutebuttons
@@ -221,6 +192,8 @@ void drawPause(Rectangle exitButton, Rectangle muteButton, bool isMuted,
   }
 }
 
+void drawPlayer(Rectangle playerRect, Vector2 *playerPosition) {}
+
 // mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
              float *bgMusicVolume, Rectangle *volumeSlider) {
@@ -295,12 +268,13 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
       newPosition.x = MAPMIN;
     if (newPosition.y < MAPMIN)
       newPosition.y = MAPMIN;
-    if (newPosition.x > MAPMAX - RECT_SIZE)
-      newPosition.x = MAPMAX - RECT_SIZE;
-    if (newPosition.y > MAPMAX - RECT_SIZE)
-      newPosition.y = MAPMAX - RECT_SIZE;
+    if (newPosition.x > MAPMAX - PLAYER_RECTW)
+      newPosition.x = MAPMAX - PLAYER_RECTW;
+    if (newPosition.y > MAPMAX - PLAYER_RECTH)
+      newPosition.y = MAPMAX - PLAYER_RECTH;
 
-    Rectangle playerRect = {newPosition.x, newPosition.y, RECT_SIZE, RECT_SIZE};
+    Rectangle playerRect = {newPosition.x, newPosition.y, PLAYER_RECTW,
+                            PLAYER_RECTH};
     if (!CheckCollisionRecs(
             playerRect,
             (Rectangle){shop.x, shop.y, shop.width - 15, shop.height - 15})) {
@@ -433,10 +407,10 @@ int main(void) {
         (Rectangle){MAPMIN - 20, MAPMIN - 20, MAPMAX + 40, MAPMAX + 40}, 20,
         BROWN);
 
-    DrawRectangleV(playerPosition, (Vector2){200, 200},
+    DrawRectangleV(playerPosition, (Vector2){PLAYER_RECTW, PLAYER_RECTH},
                    (Color){99, 149, 238, 255});
     DrawRectangleLinesEx(
-        (Rectangle){playerPosition.x, playerPosition.y, 200, 200}, 10, BLACK);
+        (Rectangle){playerPosition.x, playerPosition.y,PLAYER_RECTW, PLAYER_RECTH}, 10, BLACK);
 
     drawShopRec(shop);
 

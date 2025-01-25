@@ -22,8 +22,8 @@ void drawMinimap(MinimapMode mode, Vector2 playerposition, int mapWidth,
   float scaleX = (float)minimapWidth / mapWidth;
   float scaleY = (float)minimapHeight / mapHeight;
 
-  float playerMapX = (playerposition.x + (float)RECT_SIZE / 2) * scaleX;
-  float playerMapY = (playerposition.y + (float)RECT_SIZE / 2) * scaleY;
+  float playerMapX = (playerposition.x + (float)PLAYER_RECTW / 2) * scaleX;
+  float playerMapY = (playerposition.y + (float)PLAYER_RECTH / 2) * scaleY;
 
   DrawRectangleLines(minimapPosition.x - 10, minimapPosition.y - 10,
                      minimapWidth + 20, minimapHeight + 20, WHITE);
