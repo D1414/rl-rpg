@@ -12,166 +12,7 @@ bool isHovered(Rectangle rect) {
   Vector2 mousePosition = GetMousePosition();
   return CheckCollisionPointRec(mousePosition, rect);
 }
-void drawTextOnRec(Rectangle rec, const char *text, int size) {
-
-  // diferent size when hovered
-  int fontsize = !isHovered(rec) ? size : size + size / 20;
-  int textWidth = MeasureText(text, fontsize);
-  int textX = rec.x + (rec.width / 2) - (textWidth / 2.0);
-  int textY = rec.y + (rec.height / 2) - (fontsize / 2.0 - 10);
-  DrawText(text, textX, textY - 5, fontsize, LIGHTGRAY);
-}
-
-void highlightButton(Rectangle *rect) {
-  float scaleWidth = rect->width / 8;
-  float scaleHeight = rect->height / 8;
-  int scaleX = scaleWidth / 2;
-  int scaleY = scaleHeight / 2;
-  if (isHovered(*rect)) {
-    rect->width = rect->width + scaleWidth;
-    rect->height = rect->height + scaleHeight;
-    rect->x = rect->x - scaleX;
-    rect->y = rect->y - scaleY;
-  }
-}
-
-void drawShopRec(Rectangle shop) { DrawRectangleRec(shop, DARKBROWN); }
-
-void drawShopItems(bool shopOpen) {
-  int wX = GetScreenWidth() / 2 - 1000 / 2 + 40,
-      wY = GetScreenHeight() / 2 - 1500 / 2;
-
-  int width = 400;
-  int height = 200;
-
-  ShopItem items[] = {
-      (ShopItem){(Rectangle){wX, wY + 150, width, height}, DARKGRAY, "Döner",
-                 120},
-      (ShopItem){(Rectangle){wX, wY + 400, width, height}, DARKGRAY, "Shawarma",
-                 80},
-      (ShopItem){(Rectangle){wX, wY + 650, width, height}, DARKGRAY, "Pizza",
-                 120},
-      (ShopItem){(Rectangle){wX, wY + 900, width, height}, DARKGRAY, "Justin",
-                 110},
-      (ShopItem){(Rectangle){wX, wY + 1150, width, height}, DARKGRAY, "ZafoG",
-                 120},
-  };
-
-  size_t itemCount = sizeof(items) / sizeof(items[0]);
-  if (shopOpen) {
-    for (size_t i = 0; i < itemCount; i++) {
-      ShopItem item = items[i];
-      highlightButton(&item.rec);
-      DrawRectangleRec(item.rec, item.color);
-      DrawRectangleLinesEx(item.rec, 5, isHovered(item.rec) ? WHITE : BLACK);
-      drawTextOnRec(item.rec, item.text, item.fontsize);
-    }
-  }
-}
-
-void drawShop(bool shopOpen) {
-  int windowWidth = 1000, windowHeight = 1500;
-  int windowX = GetScreenWidth() / 2 - windowWidth / 2;
-  int windowY = GetScreenHeight() / 2 - windowHeight / 2;
-
-  if (shopOpen) {
-    Rectangle textField =
-        (Rectangle){windowX, windowY, windowWidth, windowHeight};
-    DrawRectangleRec(textField, LIGHTGRAY);
-    DrawRectangleLinesEx(textField, 10, BLACK);
-    DrawText("Shop:", windowX + 20, windowY + 20, 100, BLACK);
-    drawShopItems(shopOpen);
-  }
-}
-
-// Zeichnen und Funktion des Mutebuttons
-void drawMuteButton(Rectangle muteButton, bool *isMuted, float *bgMusicVolume) {
-  if (*bgMusicVolume == 0) {
-    *isMuted = true;
-  }
-  highlightButton(&muteButton);
-  DrawRectangleRec(muteButton, *isMuted ? RED : GREEN);
-  DrawRectangleLinesEx(muteButton, 7, BLACK);
-  const char *buttonText = *isMuted ? "MUTED" : "MUSIC";
-  int textWidth = MeasureText(buttonText, FONTSIZE);
-  int textX = muteButton.x + (muteButton.width / 2) - (textWidth / 2.0);
-  int textY = muteButton.y + (muteButton.height / 2) - (FONTSIZE / 2.0);
-  DrawText(buttonText, textX, textY, FONTSIZE, BLACK);
-}
-
-// Zeichnen und Funktion des Lautstaerke Reglers
-void drawSlider(Rectangle volumeSlider, float bgMusicVolume) {
-  DrawRectangleRec(volumeSlider, DARKGRAY);
-  DrawRectangle(volumeSlider.x, volumeSlider.y,
-                volumeSlider.width * bgMusicVolume, volumeSlider.height,
-                LIGHTGRAY);
-  DrawCircle(volumeSlider.x + volumeSlider.width * bgMusicVolume,
-             volumeSlider.y + volumeSlider.height / 2, 20, BLUE);
-}
-
-// Zeichnen des Fullscreen button und Modi switch in den Fullscreen
-void drawFullscreen(Texture2D fullscreen1, Texture2D fullscreen2,
-                    bool *isFull) {
-
-  int fullscreenTexWidth = 32 * 3 + 20;
-  int fullscreenTexHeight = 32 * 3 + 20;
-  int fullscreenTexX = GetScreenWidth() - fullscreenTexWidth;
-  int fullscreenTexY = 20;
-  Rectangle hitBox = {fullscreenTexX, fullscreenTexY, fullscreenTexWidth,
-                      fullscreenTexHeight};
-
-  if (!*isFull) {
-    if (isHovered(hitBox)) {
-      DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
-                    3.1, BLACK);
-    } else {
-      DrawTextureEx(fullscreen1, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
-                    3, BLACK);
-    }
-  } else {
-    if (isHovered(hitBox)) {
-      DrawTextureEx(fullscreen2, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
-                    3.1, BLACK);
-    } else {
-      DrawTextureEx(fullscreen2, (Vector2){fullscreenTexX, fullscreenTexY}, 0,
-                    3, BLACK);
-    }
-  }
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
-    if (isHovered(hitBox)) {
-      *isFull = !*isFull;
-      if (*isFull) {
-        ToggleBorderlessWindowed();
-        printf("turned on Fullscreen\n");
-      }
-      if (!*isFull) {
-        ToggleBorderlessWindowed();
-        printf("disabled fullscreen\n");
-      }
-    }
-  }
-}
-void drawExit(Rectangle exitButton) {
-  // enable highlighting for button
-  highlightButton(&exitButton);
-
-  DrawRectangleRec(exitButton, DARKGRAY);
-
-  // different color when hovered
-  DrawRectangleLinesEx(exitButton, 5, isHovered(exitButton) ? WHITE : BLACK);
-  const char *exitText = "Exit";
-
-  // diferent size when hovered
-  int fontsize = !isHovered(exitButton) ? 115 : 115 + 10;
-  int textWidth = MeasureText(exitText, fontsize);
-  int textX = exitButton.x + (exitButton.width / 2) - (textWidth / 2.0);
-  int textY = exitButton.y + (exitButton.height / 2) - (fontsize / 2.0 - 10);
-  DrawText(exitText, textX, textY - 5, fontsize, LIGHTGRAY);
-  if (isHovered(exitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-    CloseWindow();
-    exit(0);
-  }
-}
+void drawPlayer(Rectangle playerRect, Vector2 *playerPosition) {}
 
 // Zeichnen des Pause Menues und Anwendung der Funktionen fuer funktionen die
 // im Menue Verwendbar sein sollen
@@ -191,12 +32,9 @@ void drawPause(Rectangle exitButton, Rectangle muteButton, bool isMuted,
     drawExit(exitButton);
   }
 }
-
-void drawPlayer(Rectangle playerRect, Vector2 *playerPosition) {}
-
 // mouse inputs Verarbeitung
 void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
-             float *bgMusicVolume, Rectangle *volumeSlider) {
+             float *bgMusicVolume, Rectangle *volumeSlider, bool *isFull) {
   Rectangle sliderHitbox = {volumeSlider->x, volumeSlider->y,
                             volumeSlider->width, volumeSlider->height + 30};
   if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
@@ -216,6 +54,25 @@ void mouseIn(Rectangle muteButton, bool *isMuted, Music *bgMusic,
     }
   }
 
+  int fullscreenTexWidth = 32 * 3 + 20;
+  int fullscreenTexHeight = 32 * 3 + 20;
+  int fullscreenTexX = GetScreenWidth() - fullscreenTexWidth;
+  int fullscreenTexY = 20;
+  Rectangle hitBox = {fullscreenTexX, fullscreenTexY, fullscreenTexWidth,
+                      fullscreenTexHeight};
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
+    if (isHovered(hitBox)) {
+      *isFull = !*isFull;
+      if (*isFull) {
+        ToggleBorderlessWindowed();
+        printf("turned on Fullscreen\n");
+      }
+      if (!*isFull) {
+        ToggleBorderlessWindowed();
+        printf("disabled fullscreen\n");
+      }
+    }
+  }
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameState == GAME_PAUSED) {
     if (isHovered(sliderHitbox)) {
       Vector2 mousePosition = GetMousePosition();
@@ -268,10 +125,10 @@ void kbIn(float *playerSpeed, float deltaTime, Vector2 *playerPosition,
       newPosition.x = MAPMIN;
     if (newPosition.y < MAPMIN)
       newPosition.y = MAPMIN;
-    if (newPosition.x > MAPMAX - PLAYER_RECTW)
-      newPosition.x = MAPMAX - PLAYER_RECTW;
-    if (newPosition.y > MAPMAX - PLAYER_RECTH)
-      newPosition.y = MAPMAX - PLAYER_RECTH;
+    if (newPosition.x > MAPMAXW - PLAYER_RECTW)
+      newPosition.x = MAPMAXW - PLAYER_RECTW;
+    if (newPosition.y > MAPMAXH - PLAYER_RECTH)
+      newPosition.y = MAPMAXH - PLAYER_RECTH;
 
     Rectangle playerRect = {newPosition.x, newPosition.y, PLAYER_RECTW,
                             PLAYER_RECTH};
@@ -357,7 +214,7 @@ int main(void) {
 
   Camera2D camera = {0};
 
-  Texture2D mapTexture = LoadTexture("ressources/grass_dark.png");
+  Texture2D mapTexture = LoadTexture("ressources/grass.png");
   Texture2D fullscreen1 = LoadTexture("ressources/fullscreen_1.png");
   Texture2D fullscreen2 = LoadTexture("ressources/fullscreen_2.png");
 
@@ -380,13 +237,14 @@ int main(void) {
     Rectangle exitButton = {(float)GetScreenWidth() / 2 - (float)350 / 2,
                             (float)GetScreenHeight() / 2 + 80, 350, 130};
 
-    Rectangle shop = {0, 0, 300, 300};
+    Rectangle shop = {0, 0, RIGHT_WIDTH(300), RIGHT_HEIGHT(300)};
     BeginDrawing();
     ClearBackground(BLACK);
 
     kbIn(&playerSpeed, deltaTime, &playerPosition, &isMuted, &bgMusicVolume,
          &bgMusic, shop, &shopOpen);
-    mouseIn(muteButton, &isMuted, &bgMusic, &bgMusicVolume, &volumeSlider);
+    mouseIn(muteButton, &isMuted, &bgMusic, &bgMusicVolume, &volumeSlider,
+            &isFull);
     BeginMode2D(camera);
 
     int startX = (int)(camera.target.x - camera.offset.x) / mapTexture.width *
@@ -404,13 +262,14 @@ int main(void) {
       }
     }
     DrawRectangleLinesEx(
-        (Rectangle){MAPMIN - 20, MAPMIN - 20, MAPMAX + 40, MAPMAX + 40}, 20,
+        (Rectangle){MAPMIN - 20, MAPMIN - 20, MAPMAXW + 40, MAPMAXH + 40}, 20,
         BROWN);
 
     DrawRectangleV(playerPosition, (Vector2){PLAYER_RECTW, PLAYER_RECTH},
                    (Color){99, 149, 238, 255});
-    DrawRectangleLinesEx(
-        (Rectangle){playerPosition.x, playerPosition.y,PLAYER_RECTW, PLAYER_RECTH}, 10, BLACK);
+    DrawRectangleLinesEx((Rectangle){playerPosition.x, playerPosition.y,
+                                     PLAYER_RECTW, PLAYER_RECTH},
+                         10, BLACK);
 
     drawShopRec(shop);
 
@@ -418,7 +277,7 @@ int main(void) {
     drawShop(shopOpen);
     drawPause(exitButton, muteButton, isMuted, volumeSlider, bgMusicVolume,
               fullscreen1, fullscreen2, &isFull);
-    drawMinimap(minimapMode, playerPosition, MAPMAX, MAPMAX);
+    drawMinimap(minimapMode, playerPosition, MAPMAXW, MAPMAXH);
 
     EndDrawing();
   }
